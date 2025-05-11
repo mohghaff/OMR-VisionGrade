@@ -4,7 +4,5 @@ streamlit
 openai
 python-dotenv
 pillow
-pdf2image
-opencv-python
 PyMuPDF
 XlsxWriter
