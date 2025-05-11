@@ -1,0 +1,4 @@
+omr-app/
+__pycache__/
+*.pyc
+.env
