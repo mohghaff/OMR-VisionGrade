@@ -102,7 +102,7 @@ st.title("📄 OMR Answer Sheet Grader")
 
 # Refresh button
 if st.button("🔁 Start Over / Refresh"):
-    st.experimental_rerun()
+    st.rerun()
 
 # Sidebar controls
 model_choice = st.sidebar.selectbox(
