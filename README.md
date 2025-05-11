@@ -49,9 +49,8 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 📦 Installation
 
 # 1. Clone the repository
-git clone https://github.com/yourname/omr-answer-sheet.git
-cd omr-answer-sheet
-
+git clone https://github.com/mohghaff/OMR-VisionGrade.git
+cd OMR-VisionGrade
 # 2. Set up virtual environment (optional but recommended)
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
