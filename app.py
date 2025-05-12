@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import fitz  # PyMuPDF
 
-
+# ── Constants ───────────────────────────────────────────────────────────
 CORRECT_ANS = [
     "D", "D", "A", "C", "B", "C", "B", "B", "C", "C",
     "A", "C", "B", "C", "B", "A", "D", "A", "A", "A",
@@ -19,7 +19,7 @@ CORRECT_ANS = [
     "A", "B", "C", "C", "C", "D", "B", "A", "C", "C"
 ]
 
-# Cached Resources & Data
+# ── Cached Resources & Data ────────────────────────────────────────────
 @st.cache_resource
 def get_openai_client() -> OpenAI:
     """Initialize and cache the OpenAI client."""
@@ -37,17 +37,16 @@ def pdf_to_pil_image(pdf_bytes: bytes, dpi: int = 300) -> Image.Image:
     pix = doc[0].get_pixmap(dpi=dpi)
     return Image.open(io.BytesIO(pix.tobytes("png")))
 
-@st.cache_data
-def encode_image_for_api(_img: Image.Image) -> str:
+def encode_image_for_api(img: Image.Image) -> str:
     """
     Encode a PIL Image to a base64 JPEG string for minimal payload.
-    The leading underscore tells Streamlit not to hash this argument.
+    (No caching here so each upload yields a fresh encoding.)
     """
     buf = io.BytesIO()
-    _img.save(buf, format="JPEG", quality=85)
+    img.save(buf, format="JPEG", quality=85)
     return base64.b64encode(buf.getvalue()).decode("utf-8")
 
-#  Grading Functions
+# ── Core Grading Functions ─────────────────────────────────────────────
 def analyze_question(
     b64_image: str,
     question_number: int,
@@ -85,6 +84,7 @@ def grade_sheet(
     Loop over each question, call the API, and collect detected answers.
     Shows a Streamlit progress bar.
     """
+    # each run encodes the current image freshly
     b64 = encode_image_for_api(img)
     detected = []
     prog = st.progress(0)
@@ -96,18 +96,16 @@ def grade_sheet(
 
     return detected
 
-# Streamlit UI 
+# ── Streamlit UI ───────────────────────────────────────────────────────
 st.set_page_config(page_title="OMR Answer Sheet Grader")
 st.title("📄 OMR Answer Sheet Grader")
 
-# Refresh button
-if st.button("🔁 Start Over / Refresh"):
-    st.rerun()
+
 
 # Sidebar controls
 model_choice = st.sidebar.selectbox(
     "Choose model",
-    ["gpt-4.1-mini", "o3", "gpt-4.1", "gpt-4.1-nano"]
+    ["gpt-4.1-mini", "gpt-4.1"]
 )
 
 # File uploader
@@ -138,14 +136,12 @@ if uploaded:
     st.markdown("### Detected vs Correct Answers")
     styled = (
         df.style
-          # color-code the Status column
           .map(
               lambda v: "color: green; font-weight: bold"
                         if v == "✅"
                         else ("color: red; font-weight: bold" if v == "❌" else ""),
               subset=["Status"]
           )
-          # hide the Streamlit auto-generated index
           .set_table_styles([
               {"selector": "th.row_heading", "props": [("display", "none")]},
               {"selector": "td.row_heading", "props": [("display", "none")]}
